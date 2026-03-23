@@ -56,6 +56,11 @@ services:
       - "${SPA_PORT:-3000}:80"
     depends_on:
       - api
+    environment:
+      - API_URL=http://localhost:${API_PORT:-5100}
+      - FIREBASE_API_KEY=${FIREBASE_API_KEY}
+      - FIREBASE_AUTH_DOMAIN=${FIREBASE_AUTH_DOMAIN:-${FIREBASE_PROJECT_ID}.firebaseapp.com}
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
 
 volumes:
   mongo_data:
