@@ -19,7 +19,7 @@ services:
       MONGO_INITDB_DATABASE: zipstation
 
   api:
-    image: ghcr.io/zipstation/zip-station-service:${ZIPSTATION_VERSION:-latest}
+    image: ghcr.io/zip-station/zip-station-service:${ZIPSTATION_VERSION:-latest}
     container_name: zipstation-api
     restart: unless-stopped
     ports:
@@ -38,7 +38,7 @@ services:
       - IsProd=true
 
   worker:
-    image: ghcr.io/zipstation/zip-station-service-worker:${ZIPSTATION_VERSION:-latest}
+    image: ghcr.io/zip-station/zip-station-service-worker:${ZIPSTATION_VERSION:-latest}
     container_name: zipstation-worker
     restart: unless-stopped
     depends_on:
@@ -49,7 +49,7 @@ services:
       - EncryptionKey=${ENCRYPTION_KEY}
 
   spa:
-    image: ghcr.io/zipstation/zip-station-spa:${ZIPSTATION_VERSION:-latest}
+    image: ghcr.io/zip-station/zip-station-spa:${ZIPSTATION_VERSION:-latest}
     container_name: zipstation-spa
     restart: unless-stopped
     ports:
