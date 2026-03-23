@@ -1,0 +1,72 @@
+# Zip Station — Local Development
+# Builds all services from local source code. Requires sibling repos:
+#   ../zip-station-service
+#   ../zip-station-service-worker
+#   ../zip-station-spa
+#
+# Usage:
+#   1. Copy .env.example to .env and fill in your values
+#   2. docker compose -f docker-compose.dev.yml up --build
+#
+# Or run just MongoDB and develop services locally:
+#   docker compose -f docker-compose.dev.yml up mongo
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: zipstation-mongo-dev
+    restart: unless-stopped
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongo_dev_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: zipstation
+
+  api:
+    build:
+      context: ../zip-station-service
+      dockerfile: Dockerfile
+    container_name: zipstation-api-dev
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-5100}:80"
+    depends_on:
+      - mongo
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ZipStationMongoDb__ConnectionString=mongodb://mongo:27017
+      - ZipStationMongoDb__DatabaseName=zipstation
+      - Firebase__BearerTokenAudience=${FIREBASE_PROJECT_ID}
+      - Firebase__BearerTokenIssuer=https://securetoken.google.com/${FIREBASE_PROJECT_ID}
+      - AllowedOrigins=${ALLOWED_ORIGINS:-http://localhost:3000}
+      - EncryptionKey=${ENCRYPTION_KEY}
+      - IsLocal=true
+      - IsProd=false
+
+  worker:
+    build:
+      context: ../zip-station-service-worker
+      dockerfile: Dockerfile
+    container_name: zipstation-worker-dev
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    environment:
+      - ZipStationMongoDb__ConnectionString=mongodb://mongo:27017
+      - ZipStationMongoDb__DatabaseName=zipstation
+      - EncryptionKey=${ENCRYPTION_KEY}
+
+  spa:
+    build:
+      context: ../zip-station-spa
+      dockerfile: Dockerfile
+    container_name: zipstation-spa-dev
+    restart: unless-stopped
+    ports:
+      - "${SPA_PORT:-3000}:80"
+    depends_on:
+      - api
+
+volumes:
+  mongo_dev_data:

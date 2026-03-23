@@ -1,0 +1,61 @@
+# Zip Station — Production Deployment
+# Users only need this repo + a .env file to run the full stack.
+# Images are pulled from Docker Hub. No source code required.
+#
+# Usage:
+#   1. Copy .env.example to .env and fill in your values
+#   2. docker compose up -d
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: zipstation-mongo
+    restart: unless-stopped
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: zipstation
+
+  api:
+    image: ghcr.io/zipstation/zip-station-service:${ZIPSTATION_VERSION:-latest}
+    container_name: zipstation-api
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-5100}:80"
+    depends_on:
+      - mongo
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ZipStationMongoDb__ConnectionString=mongodb://mongo:27017
+      - ZipStationMongoDb__DatabaseName=zipstation
+      - Firebase__BearerTokenAudience=${FIREBASE_PROJECT_ID}
+      - Firebase__BearerTokenIssuer=https://securetoken.google.com/${FIREBASE_PROJECT_ID}
+      - AllowedOrigins=${ALLOWED_ORIGINS:-http://localhost:3000}
+      - EncryptionKey=${ENCRYPTION_KEY}
+      - IsLocal=false
+      - IsProd=true
+
+  worker:
+    image: ghcr.io/zipstation/zip-station-service-worker:${ZIPSTATION_VERSION:-latest}
+    container_name: zipstation-worker
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    environment:
+      - ZipStationMongoDb__ConnectionString=mongodb://mongo:27017
+      - ZipStationMongoDb__DatabaseName=zipstation
+      - EncryptionKey=${ENCRYPTION_KEY}
+
+  spa:
+    image: ghcr.io/zipstation/zip-station-spa:${ZIPSTATION_VERSION:-latest}
+    container_name: zipstation-spa
+    restart: unless-stopped
+    ports:
+      - "${SPA_PORT:-3000}:80"
+    depends_on:
+      - api
+
+volumes:
+  mongo_data:
