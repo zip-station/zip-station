@@ -57,7 +57,7 @@ services:
     depends_on:
       - api
     environment:
-      - API_URL=http://localhost:${API_PORT:-5100}
+      - API_URL=${API_URL:-http://localhost:${API_PORT:-5100}}
       - FIREBASE_API_KEY=${FIREBASE_API_KEY}
       - FIREBASE_AUTH_DOMAIN=${FIREBASE_AUTH_DOMAIN:-${FIREBASE_PROJECT_ID}.firebaseapp.com}
       - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
