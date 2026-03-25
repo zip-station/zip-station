@@ -41,6 +41,8 @@ services:
       - Firebase__BearerTokenIssuer=https://securetoken.google.com/${FIREBASE_PROJECT_ID}
       - AllowedOrigins=${ALLOWED_ORIGINS:-http://localhost:3000}
       - EncryptionKey=${ENCRYPTION_KEY}
+      - FIREBASE_ADMIN_CLIENT_EMAIL=${FIREBASE_ADMIN_CLIENT_EMAIL:-}
+      - FIREBASE_ADMIN_PRIVATE_KEY=${FIREBASE_ADMIN_PRIVATE_KEY:-}
       - IsLocal=true
       - IsProd=false
 
