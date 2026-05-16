@@ -75,5 +75,19 @@ services:
       - FIREBASE_AUTH_DOMAIN=${FIREBASE_AUTH_DOMAIN:-${FIREBASE_PROJECT_ID}.firebaseapp.com}
       - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
 
+  mcp:
+    build:
+      context: ../zip-station-mcp
+      dockerfile: Dockerfile
+    container_name: zipstation-mcp-dev
+    restart: unless-stopped
+    ports:
+      - "${MCP_PORT:-5101}:5101"
+    depends_on:
+      - api
+    environment:
+      - PORT=5101
+      - ZIP_STATION_API_URL=http://api:80
+
 volumes:
   mongo_dev_data:
